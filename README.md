@@ -26,6 +26,7 @@ This app acts as a secure proxy. Using a **Google Service Account**, the app int
 - **Zero Friction:** One-click access to add or view events.
 
 ## 📸 Demo
+![App Demo](assets/demo.gif)
 > Note: For privacy reasons, the live demo is restricted to authorized users.
 
 ## ⚙️ Setup & Architecture
