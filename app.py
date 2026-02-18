@@ -1,7 +1,7 @@
 import streamlit as st
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from streamlit_calendar import calendar
 from babel.dates import format_date
 
@@ -44,23 +44,36 @@ st.title(f"📅 {CALENDAR_NAME}")
 
 # --- ADD AN EVENT ---
 with st.form("Ajouter un événement"):
-    summary = st.text_input("Nom de l'événement")
-    date = st.date_input("Date")
-    submit = st.form_submit_button("Ajouter")
+    summary = st.text_input("Nom")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        start_date = st.date_input("Date de début", datetime.now())
+    with col2:
+        end_date = st.date_input("Date de fin")
+
+    submit = st.form_submit_button("Ajouter l'événement", use_container_width=True, type="primary")
 
     if submit:
-        # Date format for Google API (ISO format)
-        start_time = datetime.combine(date, datetime.min.time()).isoformat() + 'Z'
-        end_time = datetime.combine(date, datetime.max.time()).isoformat() + 'Z'
-        
-        event = {
-            'summary': summary,
-            'start': {'dateTime': start_time},
-            'end': {'dateTime': end_time},
-        }
-        
-        service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
-        st.success(f"Événement '{summary}' ajouté !")
+        if not summary:
+            st.error("Veuillez donner un nom à l'événement.")
+        elif end_date < start_date:
+            st.error("La date de fin ne peut pas être avant la date de début.")
+        else:
+            google_end_date = end_date + timedelta(days=1)
+            
+            event_body = {
+                'summary': summary,
+                'start': {'date': start_date.isoformat()},
+                'end': {'date': google_end_date.isoformat()},
+            }
+
+            try:
+                service.events().insert(calendarId=CALENDAR_ID, body=event_body).execute()
+                st.success(f"✅ Événement '{summary}' ajouté avec succès !")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Erreur lors de l'ajout : {e}")
 
 # --- DISPLAY EVENTS ---
 now = datetime.now().isoformat() + 'Z'
