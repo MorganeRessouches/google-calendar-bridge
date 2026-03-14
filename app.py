@@ -144,7 +144,7 @@ if display_choice == "Liste":
                 
                 # Colonne 2 : Les Détails
                 with col2:
-                    st.markdown(f"**{e['title']}**")
+                    st.markdown(f"**{e['title'].strip()}**")
                     
                     if e['is_all_day']:
                         if e['start'].date() == e['end'].date():
